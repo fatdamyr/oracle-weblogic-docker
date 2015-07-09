@@ -24,6 +24,10 @@
 # Run: 
 #      $ sudo docker build -t lucksolutions/weblogic:10.3.6 . 
 #
+# To start the image and connect to a shell
+# Run:
+#	   $ docker run --rm=true -i -t lucksolutions/weblogic:10.3.6 bash
+#
 # Pull base image
 # ---------------
 FROM centos:latest
@@ -60,11 +64,11 @@ COPY $WLS_PKG /u01/
 RUN mkdir $MW_HOME
 WORKDIR $MW_HOME
 RUN jar xf /u01/$WLS_PKG && \
-    ln -s /u01/oracle/wlserver /u01/oracle/weblogic 
+    ln -s $MW_HOME /u01/oracle/weblogic 
 
 RUN chmod a+x configure.sh
 RUN	sh configure.sh -silent && \
-    find /u01/oracle/weblogic -name "*.sh" -exec chmod a+x {} \; && \
+    find $MW_HOME -name "*.sh" -exec chmod a+x {} \; && \
     rm /u01/$WLS_PKG
 
 WORKDIR /u01/oracle
