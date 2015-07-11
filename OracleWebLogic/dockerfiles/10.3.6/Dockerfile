@@ -4,14 +4,6 @@
 # IMPORTANT
 # ---------
 # The resulting image of this Dockerfile DOES NOT contain a WLS Domain.
-# For that, look into the folder 'samples' for an example on how
-# to create a domain on a new inherited image.
-#
-# You can go into 'samples/12.1.3-generic-domain' after building the generic raw image
-# and build that image, for example:
-# 
-#   $ cd samples/12c-generic-domain
-#   $ sudo docker build -t mywls .
 #
 # REQUIRED FILES TO BUILD THIS IMAGE
 # ----------------------------------
@@ -22,7 +14,7 @@
 # -----------------------
 # Put all downloaded files in the same directory as this Dockerfile
 # Run: 
-#      $ sudo docker build -t lucksolutions/weblogic:10.3.6 . 
+#      $ docker build -t lucksolutions/weblogic:10.3.6 . 
 #
 # To start the image and connect to a shell
 # Run:
@@ -66,8 +58,15 @@ WORKDIR $MW_HOME
 RUN jar xf /u01/$WLS_PKG && \
     ln -s $MW_HOME /u01/oracle/weblogic 
 
-RUN chmod a+x configure.sh
-RUN	sh configure.sh -silent && \
+
+#Replace commEnv.sh script with our custom one to enable 64 bit JVM
+COPY commEnv.sh $MW_HOME/wlserver/common/bin/commEnv.sh
+USER root
+RUN chown oracle:oracle $MW_HOME/wlserver/common/bin/commEnv.sh
+
+USER oracle
+RUN chmod a+x configure.sh && \
+	sh configure.sh -silent && \
     find $MW_HOME -name "*.sh" -exec chmod a+x {} \; && \
     rm /u01/$WLS_PKG
 
